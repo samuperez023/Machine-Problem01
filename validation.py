@@ -1,7 +1,11 @@
-def validate_transaction_data(date_str: str, category: str, amount_raw: str) -> tuple[bool, str]:
+def validate_transaction_data(name: str, date_str: str, category: str, amount_raw: str) -> tuple[bool, str]:
+    clean_name = str(name).strip()
     clean_date = str(date_str).strip()
     clean_category = str(category).strip()
     clean_amount = str(amount_raw).strip()
+
+    if len(clean_name) == 0:
+        return False, "Name cannot be empty."
 
     date_parts = clean_date.split("-")
 
@@ -41,7 +45,7 @@ def validate_transaction_data(date_str: str, category: str, amount_raw: str) -> 
     return True, "Valid"
 
 
-def create_transaction(date_str: str, category: str, amount: float, description: str = "") -> dict:
+def create_transaction(name: str, date_str: str, category: str, amount: float, description: str = "") -> dict:
 
     clean_desc = str(description).strip()
 
@@ -51,6 +55,7 @@ def create_transaction(date_str: str, category: str, amount: float, description:
         formatted_desc = clean_desc
 
     return {
+        "name": str(name).strip().title(),
         "date": str(date_str).strip(),
         "category": str(category).strip().title(),
         "amount": round(float(amount), 2),
@@ -60,16 +65,19 @@ def create_transaction(date_str: str, category: str, amount: float, description:
 
 def format_transaction(transaction: dict) -> str:
 
+    name = transaction.get("name", "N/A")
     date = transaction.get("date", "N/A")
     category = transaction.get("category", "N/A")
     amount = transaction.get("amount", 0.0)
     description = transaction.get("description", "N/A")
 
-    return f"[{date}] | Category: {category:<15} | Amount: ₱{amount:>8.2f} | Note: {description}"
+    return f"[{date}] | User: {name:<12} | Category: {category:<15} | Amount: ₱{amount:>8.2f} | Note: {description}"
+
 
 if __name__ == "__main__":
     print("=== Expense Entry Form ===\n")
 
+    user_name = input("Enter name: ")
     user_date = input("Enter date (YYYY-MM-DD): ")
     user_category = input("Enter category (e.g., Food, Transport): ")
     user_amount = input("Enter amount (in PHP): ")
@@ -77,10 +85,11 @@ if __name__ == "__main__":
 
     print("\nValidating input...")
 
-    is_valid, error_msg = validate_transaction_data(user_date, user_category, user_amount)
+    is_valid, error_msg = validate_transaction_data(user_name, user_date, user_category, user_amount)
 
     if is_valid:
         new_transact = create_transaction(
+            name=user_name,
             date_str=user_date,
             category=user_category,
             amount=float(user_amount),
