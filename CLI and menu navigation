@@ -1,0 +1,177 @@
+"""
+CLI & Menu Navigation Module for Expense Tracker & Budget Manager
+Integrated from validationwithoutname.py
+"""
+
+import sys
+
+# Import your module functions
+# (Make sure validationwithoutname.py is in the same folder as this script)
+try:
+    from validationwithoutname import (
+        validate_transaction_data, 
+        create_transaction, 
+        format_transaction
+    )
+except ImportError:
+    print("Warning: Could not import 'validationwithoutname.py'. Make sure it is in the same directory.")
+
+
+# ==========================================
+# 1. CONSOLE INTERFACE & MENU FUNCTIONS
+# ==========================================
+
+def display_main_menu():
+    """Renders the main interactive options available to the user."""
+    print("\n" + "=" * 45)
+    print("      EXPENSE TRACKER & BUDGET MANAGER")
+    print("=" * 45)
+    print(" [1] Add a New Transaction")
+    print(" [2] View All Transactions")
+    print(" [3] View Category Spending Summary")
+    print(" [4] Filter Transactions")
+    print(" [5] Calculate Total Expenses")
+    print(" [6] Save & Exit Program")
+    print("-" * 45)
+
+def prompt_user_input(prompt_text, expected_type=str):
+    """Safely accepts and parses user responses with error handling."""
+    while True:
+        try:
+            user_input = input(prompt_text).strip()
+            
+            if expected_type == int:
+                return int(user_input)
+            elif expected_type == float:
+                return float(user_input)
+            elif expected_type == str:
+                if not user_input:
+                    print("Input cannot be empty. Please try again.")
+                    continue
+                return user_input
+            else:
+                return user_input
+                
+        except ValueError:
+            print(f"Invalid input! Expected a valid {expected_type.__name__}. Please try again.")
+
+
+# ==========================================
+# 2. FEATURE ROUTERS & HANDLERS
+# ==========================================
+
+def handle_add_transaction(transactions):ogic
+    print("\n--- Add New Transaction ---")
+    user_date = input("Enter date (YYYY-MM-DD): ")
+    user_category = input("Enter category (e.g., Food, Transport): ")
+    user_amount = input("Enter amount (in PHP): ")
+    user_desc = input("Enter description (optional): ")
+    
+    print("\nValidating input...")
+    
+    is_valid, error_msg = validate_transaction_data(user_date, user_category, user_amount)
+    
+    if is_valid:
+        new_tx = create_transaction(
+            date_str=user_date,
+            category=user_category,
+            amount=float(user_amount),
+            description=user_desc
+        )
+        transactions.append(new_tx)
+        print("\n[SUCCESS] Transaction successfully recorded!")
+        # Use your teammate's formatting function
+        print(format_transaction(new_tx))
+    else:
+        print(f"\n[ERROR] Could not record transaction: {error_msg}")
+
+def display_transactions_table(transactions):
+    if not transactions:
+        print("\nNo transactions found.")
+        return
+
+    print("\n" + "=" * 65)
+    print("                      TRANSACTION HISTORY")
+    print("=" * 65)
+    for tx in transactions:
+
+        print(format_transaction(tx))
+    print("=" * 65)
+
+def handle_category_summary(transactions):
+    """Calculates and displays summary spending grouped by category."""
+    if not transactions:
+        print("\nNo data available to summarize.")
+        summary = {}
+        return
+        
+    summary = {}
+    for tx in transactions:
+        cat = tx.get('category', 'Uncategorized')
+        amt = tx.get('amount', 0.0)
+        summary[cat] = summary.get(cat, 0.0) + amt
+        
+    print("\n" + "=" * 35)
+    print(f"{'Category':<20} | {'Total (PHP)':<10}")
+    print("-" * 35)
+    for cat, total in summary.items():
+        print(f"{cat:<20} | ₱{total:>9.2f}")
+    print("=" * 35)
+
+def handle_filter_transactions(transactions):
+    """Filters transactions by keyword or category."""
+    if not transactions:
+        print("\nNo transactions to filter.")
+        return
+        
+    keyword = prompt_user_input("Enter category or keyword to search: ").lower()
+    filtered = [
+        tx for tx in transactions 
+        if keyword in tx.get('category', '').lower() or keyword in tx.get('description', '').lower()
+    ]
+    
+    print(f"\nFiltered Results for '{keyword}':")
+    display_transactions_table(filtered)
+
+def handle_total_expenses(transactions):
+    """Computes and displays overall spending sum."""
+    total = sum(tx.get('amount', 0.0) for tx in transactions)
+    print(f"\nTotal Overall Expenses: ₱{total:,.2f}")
+
+
+# ==========================================
+# 3. CENTRAL MAIN DRIVER
+# ==========================================
+
+def main():
+    """Central loop orchestrating the menu and application states."""
+    transactions = []
+    
+    # Optional: Load from a file here if your file-handling teammate is finished
+    
+    print("Welcome to the Expense Tracker & Budget Manager!")
+
+    while True:
+        display_main_menu()
+        choice = prompt_user_input("Select an option (1-6): ", int)
+
+        if choice == 1:
+            handle_add_transaction(transactions)
+        elif choice == 2:
+            display_transactions_table(transactions)
+        elif choice == 3:
+            handle_category_summary(transactions)
+        elif choice == 4:
+            handle_filter_transactions(transactions)
+        elif choice == 5:
+            handle_total_expenses(transactions)
+        elif choice == 6:
+            print("\nExiting application. Goodbye!")
+            # Optional: Save to a file here before breaking
+            break
+        else:
+            print("❌ Invalid menu choice! Please enter a number between 1 and 6.")
+
+
+if __name__ == "__main__":
+    main()
