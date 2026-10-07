@@ -3,12 +3,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
-
-# ============================================================
-# DATA / CONSTANTS
-# ============================================================
-
 DATA_FILENAME = "transactions.csv"
+PROGRAM_TITLE = "S.A.C.K. EXPENSE TRACKER & BUDGET MANAGER"
 
 CSV_HEADER = [
     "name",
@@ -43,20 +39,12 @@ DEFAULT_BUDGETS = {
 }
 
 
-# ============================================================
-# MODULE 1: TRANSACTION OPERATIONS
-# ============================================================
-
 def validate_transaction_data(
     name: str,
     date_str: str,
     category: str,
     amount_raw: Any
 ) -> List[str]:
-    """
-    Validate transaction information.
-    Returns a list of error messages.
-    """
     errors = []
 
     if not name.strip():
@@ -87,9 +75,6 @@ def create_transaction(
     amount: float,
     description: str = ""
 ) -> Dict[str, Any]:
-    """
-    Create a transaction dictionary.
-    """
     return {
         "name": name.strip(),
         "date": date_str,
@@ -100,9 +85,6 @@ def create_transaction(
 
 
 def format_transaction(transaction: Dict[str, Any]) -> str:
-    """
-    Format one transaction for display.
-    """
     return (
         f"{transaction['name']} | "
         f"{transaction['date']} | "
@@ -112,27 +94,16 @@ def format_transaction(transaction: Dict[str, Any]) -> str:
     )
 
 
-# ============================================================
-# MODULE 2: BUDGET & ANALYTICS
-# ============================================================
-
 def calculate_total_expenses(
     transactions: List[Dict[str, Any]]
 ) -> float:
-    """
-    Calculate total expenses.
-    """
     return sum(transaction["amount"] for transaction in transactions)
 
 
 def get_category_summary(
     transactions: List[Dict[str, Any]]
 ) -> Dict[str, Dict[str, float]]:
-    """
-    Calculate spending totals and percentages per category.
-    """
     total_expenses = calculate_total_expenses(transactions)
-
     summary = {}
 
     for category in VALID_CATEGORIES:
@@ -168,10 +139,6 @@ def filter_transactions(
     filter_by: str,
     criteria: Any
 ) -> List[Dict[str, Any]]:
-    """
-    Filter transactions using different criteria.
-    """
-
     if filter_by == "category":
         return [
             transaction
@@ -217,11 +184,7 @@ def calculate_budget_variance(
     transactions: List[Dict[str, Any]],
     category_budgets: Dict[str, float]
 ) -> Dict[str, Dict[str, Any]]:
-    """
-    Compare actual spending with category budgets.
-    """
     summary = get_category_summary(transactions)
-
     variance = {}
 
     for category in VALID_CATEGORIES:
@@ -246,16 +209,9 @@ def calculate_budget_variance(
     return variance
 
 
-# ============================================================
-# MODULE 3: FILE HANDLING & STORAGE
-# ============================================================
-
 def parse_file_data(
     raw_data: List[Dict[str, str]]
 ) -> List[Dict[str, Any]]:
-    """
-    Convert CSV data into properly typed transaction dictionaries.
-    """
     transactions = []
 
     for row in raw_data:
@@ -279,9 +235,6 @@ def parse_file_data(
 def load_transactions_from_file(
     filename: str = DATA_FILENAME
 ) -> List[Dict[str, Any]]:
-    """
-    Load transactions from CSV.
-    """
     path = Path(filename)
 
     if not path.exists():
@@ -303,9 +256,6 @@ def save_transactions_to_file(
     transactions: List[Dict[str, Any]],
     filename: str = DATA_FILENAME
 ) -> bool:
-    """
-    Save transactions to CSV.
-    """
     try:
         with open(
             filename,
@@ -331,16 +281,9 @@ def save_transactions_to_file(
         return False
 
 
-# ============================================================
-# MODULE 4: CLI & MENU NAVIGATION
-# ============================================================
-
 def display_main_menu() -> None:
-    """
-    Display the main menu.
-    """
     print("\n" + "=" * 60)
-    print("        EXPENSE TRACKER & BUDGET MANAGER")
+    print(f"        {PROGRAM_TITLE}")
     print("=" * 60)
 
     print("[1]  Add New Transaction")
@@ -363,9 +306,6 @@ def prompt_user_input(
     prompt_text: str,
     expected_type=str
 ) -> Any:
-    """
-    Prompt the user and convert input to the expected type.
-    """
     while True:
         value = input(prompt_text).strip()
 
@@ -380,9 +320,6 @@ def prompt_user_input(
 
 
 def display_categories() -> None:
-    """
-    Display available categories.
-    """
     print("\nAvailable Categories:")
 
     for index, category in enumerate(VALID_CATEGORIES, start=1):
@@ -390,9 +327,6 @@ def display_categories() -> None:
 
 
 def choose_category() -> str:
-    """
-    Let the user choose a category.
-    """
     display_categories()
 
     while True:
@@ -414,9 +348,6 @@ def prompt_valid_date(
     prompt_text: str,
     allow_blank: bool = False
 ) -> str:
-    """
-    Prompt for a valid date.
-    """
     while True:
         date_str = input(prompt_text).strip()
 
@@ -434,9 +365,6 @@ def prompt_valid_date(
 def display_transactions_table(
     transactions: List[Dict[str, Any]]
 ) -> None:
-    """
-    Display transactions in a table.
-    """
     if not transactions:
         print("\nNo transactions found.")
         return
@@ -465,16 +393,9 @@ def display_transactions_table(
     print("=" * 100)
 
 
-# ============================================================
-# TRANSACTION FEATURE HANDLERS
-# ============================================================
-
 def add_transaction(
     transactions: List[Dict[str, Any]]
 ) -> None:
-    """
-    Add a new transaction.
-    """
     print("\n========== ADD TRANSACTION ==========")
 
     name = input("Expense name: ").strip()
@@ -525,9 +446,6 @@ def add_transaction(
 def edit_transaction(
     transactions: List[Dict[str, Any]]
 ) -> None:
-    """
-    Edit an existing transaction.
-    """
     if not transactions:
         print("\nNo transactions available.")
         return
@@ -557,6 +475,7 @@ def edit_transaction(
     )
 
     print("\nCurrent category:", transaction["category"])
+
     change_category = input(
         "Change category? (y/n): "
     ).strip().lower()
@@ -621,9 +540,6 @@ def edit_transaction(
 def delete_transaction(
     transactions: List[Dict[str, Any]]
 ) -> None:
-    """
-    Delete an existing transaction.
-    """
     if not transactions:
         print("\nNo transactions available.")
         return
@@ -653,16 +569,9 @@ def delete_transaction(
         print("\nDeletion cancelled.")
 
 
-# ============================================================
-# ANALYTICS FEATURE HANDLERS
-# ============================================================
-
 def show_category_summary(
     transactions: List[Dict[str, Any]]
 ) -> None:
-    """
-    Display category spending summary.
-    """
     if not transactions:
         print("\nNo transactions available.")
         return
@@ -696,9 +605,6 @@ def show_category_summary(
 def search_transactions(
     transactions: List[Dict[str, Any]]
 ) -> None:
-    """
-    Search/filter transactions.
-    """
     if not transactions:
         print("\nNo transactions available.")
         return
@@ -775,9 +681,6 @@ def search_transactions(
 def show_total_expenses(
     transactions: List[Dict[str, Any]]
 ) -> None:
-    """
-    Display total expenses.
-    """
     total = calculate_total_expenses(transactions)
 
     print("\n========== TOTAL EXPENSES ==========")
@@ -788,9 +691,6 @@ def show_budget_variance(
     transactions: List[Dict[str, Any]],
     budgets: Dict[str, float]
 ) -> None:
-    """
-    Display budget variance report.
-    """
     variance = calculate_budget_variance(
         transactions,
         budgets
@@ -825,9 +725,6 @@ def show_budget_variance(
 def set_category_budget(
     budgets: Dict[str, float]
 ) -> None:
-    """
-    Set or update a category budget.
-    """
     print("\n========== SET CATEGORY BUDGET ==========")
 
     category = choose_category()
@@ -859,13 +756,12 @@ def set_category_budget(
 def plot_expense_summary(
     summary_data: Dict[str, Dict[str, float]]
 ) -> None:
-    """
-    Plot spending by category using Matplotlib.
-    """
     try:
-        import matplotlib.pyplot as plt
+        import importlib
 
-    except ImportError:
+        plt = importlib.import_module("matplotlib.pyplot")
+
+    except (ImportError, ModuleNotFoundError):
         print(
             "\nMatplotlib is not installed. "
             "The chart cannot be displayed."
@@ -898,16 +794,9 @@ def plot_expense_summary(
     plt.show()
 
 
-# ============================================================
-# MODULE 5: SPENDING INSIGHTS
-# ============================================================
-
 def calculate_average_expense(
     transactions: List[Dict[str, Any]]
 ) -> float:
-    """
-    Calculate the average amount spent per transaction.
-    """
     if not transactions:
         return 0.0
 
@@ -919,9 +808,6 @@ def calculate_average_expense(
 def find_highest_expense(
     transactions: List[Dict[str, Any]]
 ) -> Optional[Dict[str, Any]]:
-    """
-    Find the transaction with the highest amount.
-    """
     if not transactions:
         return None
 
@@ -934,9 +820,6 @@ def find_highest_expense(
 def find_highest_spending_category(
     transactions: List[Dict[str, Any]]
 ) -> Optional[Dict[str, Any]]:
-    """
-    Find the category with the highest total spending.
-    """
     if not transactions:
         return None
 
@@ -961,9 +844,6 @@ def generate_spending_insights(
     transactions: List[Dict[str, Any]],
     budgets: Dict[str, float]
 ) -> Dict[str, Any]:
-    """
-    Generate useful insights from transaction and budget data.
-    """
     if not transactions:
         return {
             "average_expense": 0,
@@ -1031,9 +911,6 @@ def show_spending_insights(
     transactions: List[Dict[str, Any]],
     budgets: Dict[str, float]
 ) -> None:
-    """
-    Display generated spending insights.
-    """
     if not transactions:
         print("\nNo transactions available.")
         print(
@@ -1048,16 +925,15 @@ def show_spending_insights(
 
     print("\n")
     print("=" * 60)
-    print("             SPENDING INSIGHTS")
+    print(f"             {PROGRAM_TITLE}")
+    print("                   SPENDING INSIGHTS")
     print("=" * 60)
 
-    # Average expense
     print(
         f"\nAverage Expense per Transaction: "
         f"₱{insights['average_expense']:,.2f}"
     )
 
-    # Highest individual expense
     highest_expense = insights["highest_expense"]
 
     if highest_expense:
@@ -1071,7 +947,6 @@ def show_spending_insights(
             f"({highest_expense['category']})"
         )
 
-    # Highest spending category
     highest_category = insights["highest_category"]
 
     if highest_category:
@@ -1086,7 +961,6 @@ def show_spending_insights(
             f"of total spending)"
         )
 
-    # Budget alerts
     print("\n========== BUDGET INSIGHTS ==========")
 
     alerts = insights["budget_alerts"]
@@ -1121,7 +995,6 @@ def show_spending_insights(
                     f"₱{alert['difference']:,.2f}"
                 )
 
-    # Simple automatic recommendation
     print("\n========== RECOMMENDATION ==========")
 
     if highest_category:
@@ -1144,20 +1017,12 @@ def show_spending_insights(
     print("=" * 60)
 
 
-# ============================================================
-# MAIN PROGRAM
-# ============================================================
-
 def main() -> None:
-    """
-    Main program controller.
-    """
     transactions = load_transactions_from_file()
-
     budgets = DEFAULT_BUDGETS.copy()
 
     print("=" * 60)
-    print("       EXPENSE TRACKER & BUDGET MANAGER")
+    print(f"       {PROGRAM_TITLE}")
     print("=" * 60)
 
     print(
@@ -1225,7 +1090,7 @@ def main() -> None:
                     "\n✓ Transactions saved successfully."
                 )
 
-            print("Thank you for using Expense Tracker!")
+            print(f"Thank you for using {PROGRAM_TITLE}!")
             break
 
         else:
@@ -1234,10 +1099,6 @@ def main() -> None:
                 "Please select an option from the menu."
             )
 
-
-# ============================================================
-# PROGRAM ENTRY POINT
-# ============================================================
 
 if __name__ == "__main__":
     main()
